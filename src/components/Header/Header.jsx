@@ -1,17 +1,32 @@
 import React, { useRef, useEffect } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import { Container } from "reactstrap";
+import logo from "../../assets/images/res-logo.png";
+import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
-import logo from "../../assets/images/res-logo.png";
 import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
+
 import "../../styles/header.css";
 
 const nav__links = [
-  { display: "Home", path: "/home" },
-  { display: "Foods", path: "/pizzas" },
-  { display: "Cart", path: "/cart" },
-  { display: "Contact", path: "/contact" },
+  {
+    display: "Home",
+    path: "/home",
+  },
+  {
+    display: "Foods",
+    path: "/pizzas",
+  },
+  {
+    display: "Cart",
+    path: "/cart",
+  },
+  {
+    display: "Contact",
+    path: "/contact",
+  },
 ];
 
 const Header = () => {
@@ -19,30 +34,29 @@ const Header = () => {
   const headerRef = useRef(null);
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  const toggleMenu = () => {
-    menuRef.current?.classList.toggle("show__menu");
-  };
+  const toggleMenu = () => menuRef.current.classList.toggle("show__menu");
+  let navigate = useNavigate();
 
   const toggleCart = () => {
     dispatch(cartUiActions.toggle());
   };
 
+  console.log(menuRef?.current?.classList.value);
+
   useEffect(() => {
-    const handleScroll = () => {
+    window.addEventListener("scroll", () => {
       if (
         document.body.scrollTop > 80 ||
         document.documentElement.scrollTop > 80
       ) {
-        headerRef.current?.classList.add("header__shrink");
+        headerRef.current.classList.add("header__shrink");
       } else {
-        headerRef.current?.classList.remove("header__shrink");
+        headerRef.current.classList.remove("header__shrink");
       }
-    };
+    });
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll");
   }, []);
 
   return (
@@ -50,24 +64,26 @@ const Header = () => {
       <Container>
         <div className="nav__wrapper d-flex align-items-center justify-content-between">
           <div className="logo" onClick={() => navigate("/home")}>
-            {/* <img src={logo} alt="logo" /> */}
+            <img src={logo} alt="logo" />
             <h5>Tasty Treat</h5>
           </div>
-
-          <div className="navigation" ref={menuRef}>
-            <div className="menu d-flex align-items-center gap-5">
+          {/* ======= menu ======= */}
+          <div className="navigation" ref={menuRef} onClick={toggleMenu}>
+            <div
+              className="menu d-flex align-items-center gap-5"
+              onClick={(event) => event.stopPropagation()}
+            >
               <div className="header__closeButton">
                 <span onClick={toggleMenu}>
                   <i className="ri-close-fill"></i>
                 </span>
               </div>
-
               {nav__links.map((item, index) => (
                 <NavLink
-                  key={index}
                   to={item.path}
-                  className={({ isActive }) =>
-                    isActive ? "active__menu" : ""
+                  key={index}
+                  className={(navClass) =>
+                    navClass.isActive ? "active__menu" : ""
                   }
                   onClick={toggleMenu}
                 >
@@ -77,12 +93,13 @@ const Header = () => {
             </div>
           </div>
 
+          {/* ======== nav right icons ========= */}
           <div className="nav__right d-flex align-items-center gap-4">
             <span className="cart__icon" onClick={toggleCart}>
               <i className="ri-shopping-basket-line"></i>
               <span className="cart__badge">{totalQuantity}</span>
             </span>
-
+            
             <span className="mobile__menu" onClick={toggleMenu}>
               <i className="ri-menu-line"></i>
             </span>
